@@ -1,0 +1,34 @@
+# Allgemein
+.DS_Store
+Thumbs.db
+
+# Node.js (Backend & Frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Umgebungsvariablen
+.env
+.env.*.local
+
+# Tests
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Editor-/IDE-bezogene Dateien
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Temporäre Dateien
+*.swp
+*.bak
+*.tmp
+
+# Build-Verzeichnisse (Fronten
