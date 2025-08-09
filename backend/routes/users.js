@@ -1,6 +1,7 @@
-import { Router } from "express";
-import { body, query, validationResult } from "express-validator";
+import e, { Router } from "express";
+import { body, query } from "express-validator";
 import { query as dbQuery } from "../db/db.js";
+import { validate } from "../middlewares/validate.js";
 
 const router = Router();
 
@@ -9,39 +10,35 @@ router.post(
   "/",
   body("firstName").isString().trim().notEmpty(),
   body("lastName").isString().trim().notEmpty(),
-  body("email").isEmail(),
-  body("phone").optional().isString(),
+  body("email").isString().isEmail(),
+  body("phone").isString(),
+  validate,
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() });
-
     const { firstName, lastName, email, phone } = req.body;
+
+    const sql = `INSERT INTO users(first_name, last_name, email,phone)
+         VALUES ($1, $2, $3, $4) RETURNING *`;
+    const params = [firstName, lastName, email, phone || null];
+
     try {
-      const { rows } = await dbQuery(
-        `INSERT INTO users(first_name,last_name,email,phone)
-         VALUES ($1,$2,$3,$4) RETURNING *`,
-        [firstName, lastName, email, phone || null]
-      );
+      const { rows } = await dbQuery(sql, params);
       res.status(201).json(rows[0]);
     } catch (e) {
-      if (e.code === "23505")
-        return res.status(409).json({ message: "Email already exists" });
-      console.error(e);
-      res.status(500).json({ message: "Internal error" });
+      return res.status(500).json({ message: e.message });
     }
   }
 );
 
-// GET /users?limit=&offset=&q=
+// GET /users?limit=&offset=&email=
 router.get(
   "/",
-  query("limit").optional().isInt({ min: 1, max: 100 }),
-  query("offset").optional().isInt({ min: 0 }),
+  query("limit").optional().isInt({ min: 1, max: 99 }).toInt(),
+  query("offset").optional().isInt({ min: 0 }).toInt(),
+  query("email").optional().isEmail(),
   async (req, res) => {
-    const limit = Number(req.query.limit || 20);
-    const offset = Number(req.query.offset || 0);
-    const email = (req.query.email || "").toString().trim();
+    const limit = req.query.limit || 20;
+    const offset = req.query.offset || 0;
+    const email = (req.query.email || "").trim();
 
     const where = email ? `WHERE email LIKE $1` : "";
     const params = email ? [email, limit, offset] : [limit, offset];
@@ -57,8 +54,12 @@ router.get(
       ORDER BY id DESC
       LIMIT $${email ? 2 : 1} OFFSET $${email ? 3 : 2}
     `;
-    const { rows } = await dbQuery(sql, params);
-    res.json(rows);
+    try {
+      const { rows } = await dbQuery(sql, params);
+      res.status(200).json(rows);
+    } catch (e) {
+      res.status(500).json({ errors: e.message });
+    }
   }
 );
 
