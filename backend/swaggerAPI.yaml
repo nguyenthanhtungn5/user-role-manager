@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: User & Role Management API
+  version: 1.0.0
+  description: |
+    Eine einfache REST API zur Verwaltung von Benutzern und Rollen.
+
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /users:
+    get:
+      summary: Benutzer auflisten
+      tags: [Benutzer]
+      responses:
+        "200":
+          description: Liste aller Benutzer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      summary: Benutzer erstellen
+      tags: [Benutzer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Benutzer erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}/assign-role:
+    post:
+      summary: Rollen einem Benutzer zuweisen
+      tags: [Benutzer]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Rollen erfolgreich zugewiesen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  roles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Role"
+
+  /roles:
+    post:
+      summary: Rolle erstellen
+      tags: [Rollen]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleInput"
+      responses:
+        "201":
+          description: Rolle erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+
+    delete:
+      summary: Rolle löschen
+      tags: [Rollen]
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Rolle erfolgreich gelöscht
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+
+    UserInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    RoleInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
