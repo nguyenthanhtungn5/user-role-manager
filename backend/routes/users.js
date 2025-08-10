@@ -1,11 +1,11 @@
-import e, { Router } from "express";
+import { Router } from "express";
 import { body, query } from "express-validator";
 import { query as dbQuery } from "../db/db.js";
 import { validate } from "../middlewares/validate.js";
 
 const router = Router();
 
-// POST /users
+// POST /api/users
 router.post(
   "/",
   body("firstName").isString().trim().notEmpty(),
@@ -31,7 +31,7 @@ router.post(
   }
 );
 
-// GET /users?limit=&offset=&email=
+// GET /api/users?limit=&offset=&email=
 router.get(
   "/",
   query("limit").optional().isInt({ min: 1, max: 99 }).toInt(),

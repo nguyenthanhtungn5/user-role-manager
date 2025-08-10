@@ -1,8 +1,6 @@
 import { Router } from "express";
-import users from "../data/users.js";
-import roles from "../data/roles.js";
 import { query as dbQuery } from "../db/db.js";
-import { body, query } from "express-validator";
+import { body } from "express-validator";
 import { validate } from "../middlewares/validate.js";
 
 const router = Router();
@@ -11,17 +9,18 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const sql = `SELECT id, name FROM roles`;
-    const { rows } = dbQuery(sql);
-    res.json(rows);
+    const { rows } = await dbQuery(sql);
+    res.status(200).json(rows);
   } catch (e) {
     return res.status(500).json({ message: e.message });
   }
 });
 
-// POST /api/roles
+// POST /api/roles  { name }
 router.post(
   "/",
   body("name").isString().trim().notEmpty(),
+  validate,
   async (req, res) => {
     const { name } = req.body;
     const sql = `INSERT INTO roles(name) VALUES ($1) RETURNING *`;

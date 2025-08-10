@@ -1,46 +1,47 @@
 import { Router } from "express";
-import { body, param, validationResult } from "express-validator";
+import { body, param } from "express-validator";
 import { query as db } from "../db/db.js";
+import { validate } from "../middlewares/validate.js";
 
 const router = Router();
 
+// GET /api/permissions
+router.get("/", async (_req, res) => {
+  try {
+    const { rows } = await db("SELECT * FROM permissions ORDER BY id DESC");
+    res.status(200).json(rows);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// POST /api/permissions { name }
 router.post(
   "/",
   body("name").isString().trim().notEmpty(),
+  validate,
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     try {
-      const { rows } = await db(
-        "INSERT INTO permissions(name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING *",
-        [req.body.name]
-      );
-      if (!rows.length) {
-        return res.status(200).json({ message: "Permission already exists" });
-      }
+      const { rows } = await db("INSERT INTO permissions(name) VALUES ($1)", [
+        req.body.name,
+      ]);
       res.status(201).json(rows[0]);
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ message: "Internal error" });
+      res.status(500).json({ message: e.message });
     }
   }
 );
 
-router.delete("/:id", param("id").isInt(), async (req, res) => {
-  const { rowCount } = await db("DELETE FROM permissions WHERE id=$1", [
-    req.params.id,
-  ]);
-  if (!rowCount) {
-    return res.status(404).json({ message: "Permission not found" });
+// DELETE /api/permissions/:id
+router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
+  try {
+    const { rows } = await db("DELETE FROM permissions WHERE id=$1", [
+      req.params.id,
+    ]);
+    res.status(204).send();
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
-  res.status(204).send();
-});
-
-router.get("/", async (_req, res) => {
-  const { rows } = await db("SELECT * FROM permissions ORDER BY id DESC");
-  res.json(rows);
 });
 
 export default router;
