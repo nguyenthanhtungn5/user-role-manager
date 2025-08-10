@@ -16,7 +16,7 @@ router.post(
   async (req, res) => {
     const { firstName, lastName, email, phone } = req.body;
 
-    const sql = `INSERT INTO users(first_name, last_name, email,phone)
+    const sql = `INSERT INTO users (first_name, last_name, email, phone)
          VALUES ($1, $2, $3, $4) RETURNING *`;
     const params = [firstName, lastName, email, phone || null];
 
@@ -24,7 +24,9 @@ router.post(
       const { rows } = await dbQuery(sql, params);
       res.status(201).json(rows[0]);
     } catch (e) {
-      return res.status(500).json({ message: e.message });
+      return res
+        .status(e.code === "23505" ? 409 : 500)
+        .json({ message: e.message });
     }
   }
 );
