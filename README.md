@@ -91,18 +91,29 @@ npm run serve
 2. Neue Datenbank erstellen: `user_management`
 3. SQL-Schema aus `sql/init.sql` ausführen
 
-## 📡 API-Endpunkte (Beispiele)
+## API-Dokumentation (Swagger UI)
 
-| Methode | Route                         | Beschreibung                  |
-| ------- | ----------------------------- | ----------------------------- |
-| GET     | `/api/users`                  | Benutzer auflisten            |
-| POST    | `/api/users`                  | Benutzer anlegen              |
-| POST    | `/api/roles`                  | Neue Rolle erstellen          |
-| DELETE  | `/api/roles/:id`              | Rolle löschen                 |
-| POST    | `/api/permissions`            | Neues Recht erstellen         |
-| DELETE  | `/api/permissions/:id`        | Recht löschen                 |
-| POST    | `/api/users/:id/assign-role`  | Rolle einem Benutzer zuweisen |
-| POST    | `/api/roles/:id/assign-right` | Recht einer Rolle zuweisen    |
+Die API ist unter folgendem Endpunkt dokumentiert:
+
+http://localhost:8888/api-docs
+
+API-Endpunkte (basierend auf Swagger)
+
+| Methode | Route                          | Beschreibung                              |
+| ------- | ------------------------------ | ----------------------------------------- |
+| GET     | `/api/users`                   | Benutzer auflisten                        |
+| POST    | `/api/users`                   | Benutzer anlegen                          |
+| DELETE  | `/api/users`                   | Benutzer löschen                          |
+| GET     | `/api/roles`                   | Rolle auflisten                           |
+| POST    | `/api/roles`                   | Neue Rolle erstellen                      |
+| DELETE  | `/api/roles/:id`               | Rolle löschen                             |
+| GET     | `/api/permissions`             | Rechte auflisten                          |
+| POST    | `/api/permissions`             | Neues Recht erstellen                     |
+| DELETE  | `/api/permissions/:id`         | Recht löschen                             |
+| GET     | `/api/assign/user-roles`       | Rollen-Zuweisungen zu Benutzern auflisten |
+| POST    | `/api/assign/user-roles`       | Rollen einem Benutzer zuweisen            |
+| GET     | `/api/assign/role-permissions` | Rechte-Zuweisungen zu Rollen auflisten    |
+| POST    | `/api/assign/role-permissions` | Rechte einer Rolle zuweisen               |
 
 ## Entwicklungsskripte
 

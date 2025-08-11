@@ -5,6 +5,18 @@ import { validate } from "../middlewares/validate.js";
 
 const router = Router();
 
+// GET /api/assign/user-roles
+router.get("/user-roles", async (req, res) => {
+  try {
+    const { rows } = await db(
+      `SELECT user_id AS userId, role_id AS roleId FROM user_roles`
+    );
+    res.status(200).send(rows);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 // POST /api/assign/user-roles  { userId, roleIds: [] }
 router.post(
   "/user-roles",
@@ -26,13 +38,25 @@ router.post(
         );
       }
       await db("COMMIT");
-      res.status(204).send();
+      res.status(200).send();
     } catch (e) {
       await db("ROLLBACK");
       res.status(500).json({ message: e.message });
     }
   }
 );
+
+// GET /api/assign/user-roles
+router.get("/role-permissions", async (req, res) => {
+  try {
+    const { rows } = await db(
+      `SELECT role_id AS roleId, permission_id AS permissionId FROM role_permissions`
+    );
+    res.status(200).send(rows);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 // POST /api/assign/role-permissions  { roleId, permissionIds: [] }
 router.post(
@@ -55,7 +79,7 @@ router.post(
         );
       }
       await db("COMMIT");
-      res.status(204).send();
+      res.status(200).send();
     } catch (e) {
       await db("ROLLBACK");
       res.status(500).json({ message: e.message });

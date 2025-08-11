@@ -207,6 +207,25 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
 
   /api/assign/user-roles:
+    get:
+      tags: [Assignments]
+      summary: Alle zuweisungen zwischen Rollen und Benutzer auflisten
+      responses:
+        "200":
+          description: Liste der Zuweisungen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserRolesAssignments"
+              example:
+                - userId: 1
+                  roleId: 1
+                - userId: 2
+                  roleId: 2
+        "500":
+          description: Interner Fehler
     post:
       tags: [Assignments]
       summary: Rollen einem Benutzer zuweisen
@@ -225,8 +244,29 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ValidationError" }
+        "500":
+          description: Interner Fehler
 
   /api/assign/role-permissions:
+    get:
+      tags: [Assignments]
+      summary: Alle zuweisungen zwischen Rollen und Permission auflisten
+      responses:
+        "200":
+          description: Liste der Zuweisungen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RolePermissionsAssignments"
+              example:
+                - roleId: 1
+                  permissionId: 1
+                - roleId: 1
+                  permissionId: 2
+        "500":
+          description: Interner Fehler
     post:
       tags: [Assignments]
       summary: Rechte einer Rolle zuweisen
@@ -246,6 +286,8 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ValidationError" }
+        "500":
+          description: Interner Fehler
 
 components:
   schemas:
@@ -313,6 +355,18 @@ components:
       properties:
         id: { type: integer, example: 1 }
         name: { type: string, example: "user.write" }
+
+    UserRolesAssignments:
+      type: object
+      properties:
+        userId: { type: integer, example: 1 }
+        roleId: { type: integer, example: 1 }
+
+    RolePermissionsAssignments:
+      type: object
+      properties:
+        roleId: { type: integer, example: 1 }
+        permissionId: { type: integer, example: 1 }
 
     CreatePermissionRequest:
       type: object
