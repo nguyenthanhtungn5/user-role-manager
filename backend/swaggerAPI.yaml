@@ -226,24 +226,29 @@ paths:
                   roleId: 2
         "500":
           description: Interner Fehler
-    post:
+    put:
       tags: [Assignments]
-      summary: Rollen einem Benutzer zuweisen
+      summary: Rollen eines Benutzers vollständig setzen (ersetzen)
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer, minimum: 1 }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AssignUserRolesRequest" }
-            examples:
-              example:
-                value: { userId: 1, roleIds: [1, 2] }
+            schema:
+              type: object
+              required: [roleIds]
+              properties:
+                roleIds:
+                  type: array
+                  items: { type: integer }
+                  example: [1, 2, 3]
       responses:
-        "204": { description: Erfolgreich zugewiesen }
-        "400":
-          description: Validierungsfehler
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ValidationError" }
+        "204":
+          description: Aktualisiert
         "500":
           description: Interner Fehler
 
@@ -267,28 +272,31 @@ paths:
                   permissionId: 2
         "500":
           description: Interner Fehler
-    post:
+    put:
       tags: [Assignments]
-      summary: Rechte einer Rolle zuweisen
+      summary: Rechte einer Rolle vollständig setzen (ersetzen)
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema: { type: integer, minimum: 1 }
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              { $ref: "#/components/schemas/AssignRolePermissionsRequest" }
-            examples:
-              example:
-                value: { roleId: 1, permissionIds: [1, 3, 5] }
+              type: object
+              required: [permissionIds]
+              properties:
+                permissionIds:
+                  type: array
+                  items: { type: integer }
+                  example: [1, 3, 5]
       responses:
-        "204": { description: Erfolgreich zugewiesen }
-        "400":
-          description: Validierungsfehler
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ValidationError" }
+        "204":
+          description: Aktualisiert
         "500":
           description: Interner Fehler
-
 components:
   schemas:
     Message:
