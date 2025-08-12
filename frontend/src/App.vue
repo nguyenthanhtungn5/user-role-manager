@@ -1,26 +1,25 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+  <v-app>
+    <v-main>
+      <v-container class="py-6" max-width="1200">
+        <h2 class="mb-4">User Management Demo</h2>
+
+        <v-tabs v-model="tab">
+          <v-tab to="/users"        value="users">Users</v-tab>
+          <v-tab to="/roles"        value="roles">Roles</v-tab>
+          <v-tab to="/permissions"  value="permissions">Permissions</v-tab>
+          <v-tab to="/assignments"  value="assignments">Assignments</v-tab>
+        </v-tabs>
+
+        <router-view />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
-<script>
-import LoginView from "./views/LoginView.vue";
-
-export default {
-  name: "App",
-  components: {
-    LoginView,
-  },
-};
+<script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+const route = useRoute();
+const tab = computed(() => route.name); // hält Tab & Route synchron
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>

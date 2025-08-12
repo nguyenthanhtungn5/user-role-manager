@@ -1,22 +1,18 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '../views/LoginView.vue'
+import { createRouter, createWebHistory } from "vue-router";
 
-const routes = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: LoginView
-  },
-  {
-    path: '/',
-    redirect: '/login'
-  },
-  // hier z. B. Dashboard später hinzufügen
-]
+// Lazy-loaded Views (erstmal Platzhalter; Inhalte wie in deinen Tabs)
+const Users = () => import("../views/UsersView.vue");
+//const Roles = () => import("../views/RolesView.vue");
+//const Permissions = () => import("../views/PermissionsView.vue");
+//const Assignments = () => import("../views/AssignmentsView.vue");
 
-const router = createRouter({
+export default createRouter({
   history: createWebHistory(),
-  routes
-})
-
-export default router
+  routes: [
+    { path: "/", redirect: "/users" },
+    { path: "/users", name: "users", component: Users },
+    //{ path: "/roles", name: "roles", component: Roles },
+    //{ path: "/permissions", name: "permissions", component: Permissions },
+    // { path: "/assignments", name: "assignments", component: Assignments },
+  ],
+});
