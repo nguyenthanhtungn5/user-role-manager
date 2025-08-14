@@ -1,7 +1,22 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import router from "./router";
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
-import router from "./router";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
 
-createApp(App).use(createVuetify({})).use(router).mount("#app");
+import "@mdi/font/css/materialdesignicons.css";
+import { aliases, mdi } from "vuetify/iconsets/mdi";
+
+const vuetify = createVuetify({
+  components, // ⬅️ jetzt kennt Vue <v-btn>, <v-app-bar>, ...
+  directives, // ⬅️ z.B. v-ripple etc.
+  icons: {
+    defaultSet: "mdi",
+    aliases,
+    sets: { mdi },
+  },
+});
+
+createApp(App).use(router).use(vuetify).mount("#app");

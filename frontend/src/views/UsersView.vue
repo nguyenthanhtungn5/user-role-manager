@@ -1,68 +1,85 @@
 <template>
-  <v-card>
-    <v-card-title class="justify-space-between">
-      <span>Users</span>
-      <div class="d-flex" style="gap: 8px">
-        <v-text-field
-          v-model="email"
-          label="Suche: Email"
-          density="compact"
-          hide-details
-        />
-        <v-btn @click="load" :loading="loading">Reload</v-btn>
-        <v-btn color="primary" @click="createOne" :loading="creating"
-          >Add</v-btn
-        >
-      </div>
-    </v-card-title>
-    <v-data-table
-      :items="users"
-      :headers="headers"
-      :items-per-page="10"
-      class="px-2 pb-4"
-    />
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="text-h5"
+        >Benutzerrollen-Verwaltung Demo</v-card-title
+      >
+      <v-card-text>
+        <v-data-table :headers="headers" :items="usersWithRoles" item-key="id">
+          <!-- Rollen-Spalte mit Mehrfachauswahl -->
+          <template #[`item.roles`]="{ item }">
+            <v-select
+              v-model="item.roleIds"
+              :items="roles"
+              item-title="name"
+              item-value="id"
+              multiple
+              chips
+              density="comfortable"
+              hide-details
+              @update:model-value="updateUserRoles(item)"
+            />
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { api } from "../api/api.js";
-const users = ref([]);
-const email = ref("");
-const loading = ref(false);
-const creating = ref(false);
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+
+// Tabellen-Spalten
 const headers = [
-  { title: "ID", value: "id", width: 70 },
-  { title: "First", value: "firstName" },
-  { title: "Last", value: "lastName" },
-  { title: "Email", value: "email" },
-  { title: "Phone", value: "phone" },
+  { title: "ID", key: "id" },
+  { title: "Vorname", key: "firstName" },
+  { title: "Nachname", key: "lastName" },
+  { title: "E-Mail", key: "email" },
+  { title: "Telefon", key: "phone" },
+  { title: "Rollen", key: "roles" },
 ];
-async function load() {
-  loading.value = true;
+
+const users = ref([]);
+const roles = ref([]);
+const assignments = ref([]);
+
+const usersWithRoles = computed(() => {
+  return users.value.map((user) => {
+    const assignedRoleIds = assignments.value
+      .filter((a) => a.userid === user.id)
+      .map((a) => a.roleid);
+
+    return {
+      ...user,
+      roleIds: assignedRoleIds,
+    };
+  });
+});
+
+// Daten laden
+onMounted(async () => {
+  const [usersRes, rolesRes, assignmentsRes] = await Promise.all([
+    axios.get("http://localhost:8888/api/users"),
+    axios.get("http://localhost:8888/api/roles"),
+    axios.get("http://localhost:8888/api/assign/user-roles"),
+  ]);
+
+  users.value = usersRes.data;
+  roles.value = rolesRes.data;
+  assignments.value = assignmentsRes.data;
+});
+
+// Rollen speichern (PUT)
+async function updateUserRoles(user) {
   try {
-    const { data } = await api.get("/api/users", {
-      params: { limit: 100, offset: 0, email: email.value || undefined },
+    await axios.put("http://localhost:8888/api/assign/user-roles", {
+      userId: user.id,
+      roleIds: user.roleIds,
     });
-    users.value = data;
-  } finally {
-    loading.value = false;
+    console.log("Rollen aktualisiert für", user.firstName);
+  } catch (err) {
+    console.error("Fehler beim Speichern der Rollen", err);
   }
 }
-async function createOne() {
-  creating.value = true;
-  try {
-    const n = Math.floor(Math.random() * 10000);
-    await api.post("/api/users", {
-      firstName: "Ada",
-      lastName: "Lovelace" + n,
-      email: `ada${n}@example.com`,
-      phone: "+49 151 23456789",
-    });
-    await load();
-  } finally {
-    creating.value = false;
-  }
-}
-onMounted(load);
 </script>

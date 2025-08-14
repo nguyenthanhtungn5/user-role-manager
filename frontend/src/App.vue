@@ -1,16 +1,28 @@
 <template>
   <v-app>
+    <v-app-bar>
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
+      <v-toolbar-title>Benutzer-Rollenverwaltung Demo</v-toolbar-title>
+    </v-app-bar>
+
+    <v-navigation-drawer v-model="drawer" temporary>
+      <v-list nav density="comfortable">
+        <v-list-item
+          to="/users"
+          title="Benutzer & Rollenbezogen"
+          prepend-icon="mdi-account-cog"
+        />
+      </v-list>
+      <v-list nav density="comfortable">
+        <v-list-item
+          to="/roles"
+          title="Benutzerrolle / Berechtigung"
+          prepend-icon="mdi-shield-key"
+        />
+      </v-list>
+    </v-navigation-drawer>
     <v-main>
-      <v-container class="py-6" max-width="1200">
-        <h2 class="mb-4">User Management Demo</h2>
-
-        <v-tabs v-model="tab">
-          <v-tab to="/users"        value="users">Users</v-tab>
-          <v-tab to="/roles"        value="roles">Roles</v-tab>
-          <v-tab to="/permissions"  value="permissions">Permissions</v-tab>
-          <v-tab to="/assignments"  value="assignments">Assignments</v-tab>
-        </v-tabs>
-
+      <v-container class="py-6" max-width="80em">
         <router-view />
       </v-container>
     </v-main>
@@ -18,8 +30,6 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useRoute } from "vue-router";
-const route = useRoute();
-const tab = computed(() => route.name); // hält Tab & Route synchron
+import { ref } from "vue";
+const drawer = ref(false);
 </script>
