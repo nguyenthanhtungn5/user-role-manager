@@ -35,6 +35,8 @@ router.get(
       res.status(200).json(rows);
     } catch (e) {
       res.status(500).json({ errors: e.message });
+    } finally {
+      client.release();
     }
   }
 );
@@ -61,6 +63,8 @@ router.post(
       return res
         .status(e.code === "23505" ? 409 : 500)
         .json({ message: e.message });
+    } finally {
+      client.release();
     }
   }
 );
@@ -74,6 +78,8 @@ router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
     res.status(204).send();
   } catch (e) {
     return res.status(500).json({ message: e.message });
+  } finally {
+    client.release();
   }
 });
 export default router;

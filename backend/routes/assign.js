@@ -7,6 +7,7 @@ const router = Router();
 
 // GET /api/assign/user-roles
 router.get("/user-roles", async (req, res) => {
+  debugger;
   const client = await pool.connect();
 
   try {
@@ -16,6 +17,8 @@ router.get("/user-roles", async (req, res) => {
     res.status(200).send(rows);
   } catch (e) {
     res.status(500).json({ message: e.message });
+  } finally {
+    client.release();
   }
 });
 
@@ -52,6 +55,8 @@ router.put(
     } catch (e) {
       await client.query("ROLLBACK");
       res.status(500).json({ message: e.message });
+    } finally {
+      client.release();
     }
   }
 );
@@ -67,6 +72,8 @@ router.get("/role-permissions", async (req, res) => {
     res.status(200).send(rows);
   } catch (e) {
     res.status(500).json({ message: e.message });
+  } finally {
+    client.release();
   }
 });
 
@@ -103,6 +110,8 @@ router.put(
     } catch (e) {
       await client.query("ROLLBACK");
       res.status(500).json({ message: e.message });
+    } finally {
+      client.release();
     }
   }
 );
