@@ -1,12 +1,8 @@
 <template>
   <v-container>
     <v-card>
-      <v-card-title class="text-h5"
-        >Benutzerrollen-Verwaltung Demo</v-card-title
-      >
       <v-card-text>
         <v-data-table :headers="headers" :items="usersWithRoles" item-key="id">
-          <!-- Rollen-Spalte mit Mehrfachauswahl -->
           <template #[`item.roles`]="{ item }">
             <v-select
               v-model="item.roleIds"
@@ -43,6 +39,8 @@ const headers = [
 const users = ref([]);
 const roles = ref([]);
 const assignments = ref([]);
+
+const saving = ref(new Set());
 
 const usersWithRoles = computed(() => {
   return users.value.map((user) => {
