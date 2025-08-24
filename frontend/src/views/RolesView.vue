@@ -1,24 +1,23 @@
 <template>
   <v-container>
-    <v-card-title>Rolle verwalten</v-card-title>
+    <v-card-title>Rolle verwalten </v-card-title>
     <v-card>
-      <v-card-text>
-        <v-data-table :headers="headers" :items="roleWithPermissions" item-key="id">
-          <template #[`item.permissions`]="{ item }">
-            <v-select
-              :model-value="item.permissionIds"
-              :items="permissions"
-              item-title="name"
-              item-value="id"
-              multiple
-              chips
-              density="comfortable"
-              @update:model-value="(val) => updatePermissionRoles(item, val)"
-              :loading="loadingByRole[item.id] === true"
-            ></v-select>
-          </template>
-        </v-data-table>
-      </v-card-text>
+      <v-data-table :headers="headers" :items="roleWithPermissions" item-key="id">
+        <template #[`item.permissions`]="{ item }">
+          <v-select
+            :model-value="item.permissionIds"
+            :items="permissions"
+            item-title="name"
+            item-value="id"
+            multiple
+            chips
+            hide-details
+            density="comfortable"
+            @update:model-value="(val) => updatePermissionRoles(item, val)"
+            :loading="loadingByRole[item.id] === true"
+          />
+        </template>
+      </v-data-table>
     </v-card>
     <!-- Snackbar für Erfolg/Error -->
     <v-snackbar v-model="snackbar.open" :timeout="3000" :color="snackbar.color">
@@ -29,7 +28,13 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import axios from 'axios'
+import {
+  assignRolePermissions,
+  getAllPermissions,
+  getAllRoles,
+  getRolePermissions,
+} from '@/api/index.js'
+import { notify } from '@/utils/notify'
 
 const headers = [
   { title: 'ID', key: 'id' },
@@ -46,9 +51,9 @@ const snackbar = ref({ open: false, text: '', color: 'success' })
 // Daten laden
 onMounted(async () => {
   const [rolesRes, permissionsRes, rolePermissionsRes] = await Promise.all([
-    axios.get('http://localhost:8888/api/roles'), // [{ "id": 1, "name": "admin" }]
-    axios.get('http://localhost:8888/api/permissions'), // [{"id": 6, "name": "role_delete"}]
-    axios.get('http://localhost:8888/api/assign/role-permissions'), // [{"roleid": 1,"permissionid": 1}]
+    getAllRoles(), // [{ "id": 1, "name": "admin" }]
+    getAllPermissions(), // [{"id": 6, "name": "role_delete"}]
+    getRolePermissions(), // [{"roleid": 1,"permissionid": 1}]
   ])
   roles.value = rolesRes.data
   permissions.value = permissionsRes.data.map((i) => ({
@@ -72,7 +77,7 @@ const roleWithPermissions = computed(() => {
 
 async function updatePermissionRoles(role, newIds) {
   if (newIds.length === 0) {
-    notify('Eine Rolle benötigt mindestens eine Berechtigung', 'error')
+    notify(snackbar, 'Eine Rolle benötigt mindestens eine Berechtigung', 'error')
     return
   }
   const roleId = role.id
@@ -80,7 +85,7 @@ async function updatePermissionRoles(role, newIds) {
     // Loading an
     loadingByRole.value = { ...loadingByRole.value, [roleId]: true }
     // PUT an Server – wir ändern lokal noch NICHTS
-    await axios.put('http://localhost:8888/api/assign/role-permissions', {
+    await assignRolePermissions({
       roleId: role.id,
       permissionIds: newIds,
     })
@@ -89,9 +94,9 @@ async function updatePermissionRoles(role, newIds) {
       ...rolePermissionsByRole.value,
       [roleId]: newIds,
     }
-    notify(`Rechte für "${role.name}" gespeichert`, 'success')
+    notify(snackbar, `Rechte für "${role.name}" gespeichert`, 'success')
   } catch (err) {
-    notify('Fehler beim Speichern der Rechte', 'error')
+    notify(snackbar, 'Fehler beim Speichern der Rechte', 'error')
   } finally {
     // Loading aus
     loadingByRole.value = { ...loadingByRole.value, [roleId]: false }
@@ -115,9 +120,5 @@ const mapPermissionName = (rawName) => {
     default:
       return rawName?.replaceAll('_', ' ') || ''
   }
-}
-
-function notify(text, color = 'success') {
-  snackbar.value = { open: true, text, color }
 }
 </script>

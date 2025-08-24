@@ -1,36 +1,122 @@
+<style scoped>
+.custom-dialog-overlay {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+</style>
+
 <template>
   <v-container>
-    <v-card-title>Benutzer verwalten</v-card-title>
-
+    <v-card-title class="d-flex justify-space-between align-center">
+      <span class="text-h4">Benutzer verwalten</span>
+      <v-btn
+        @click="showAddUserDialog = true"
+        color="primary"
+        class="text-body-2 px-4"
+        elevation="3"
+        >Neue Benutzer anlegen</v-btn
+      >
+    </v-card-title>
     <v-card>
-      <v-card-text>
-        <v-data-table :headers="headers" :items="usersWithRoles" item-key="id">
-          <template #[`item.roles`]="{ item }">
-            <v-select
-              :model-value="item.roleIds"
-              :items="roles"
-              item-title="name"
-              item-value="id"
-              multiple
-              chips
-              density="comfortable"
-              @update:model-value="(val) => updateUserRoles(item, val)"
-              :loading="loading[item.id] === true"
-            />
-          </template>
-        </v-data-table>
-      </v-card-text>
+      <v-data-table :headers="headers" :items="usersWithRoles" item-key="id">
+        <template #[`item.roles`]="{ item }">
+          <v-select
+            :model-value="item.roleIds"
+            :items="roles"
+            item-title="name"
+            item-value="id"
+            multiple
+            chips
+            hide-details
+            density="comfortable"
+            @update:model-value="(val) => updateUserRoles(item, val)"
+            :loading="loadingUpdateRoles[item.id] === true"
+          />
+        </template>
+        <template #[`item.action`]="{ item }">
+          <div class="d-flex justify-center align-center" style="height: 100%; gap: 8px">
+            <v-tooltip text="Benutzer löschen" location="bottom">
+              <template #activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon
+                  color="error"
+                  style="cursor: pointer"
+                  @click="deleteUser(item)"
+                  >mdi-delete-outline</v-icon
+                >
+              </template>
+            </v-tooltip>
+          </div>
+        </template>
+      </v-data-table>
     </v-card>
     <!-- Snackbar für Erfolg/Error -->
     <v-snackbar v-model="snackbar.open" :timeout="3000" :color="snackbar.color">
       {{ snackbar.text }}
     </v-snackbar>
   </v-container>
+  <v-dialog
+    v-model="showAddUserDialog"
+    max-width="600px"
+    min-width="500px"
+    overlay-class="custom-dialog-overlay"
+  >
+    <v-card class="px-4 py-4">
+      <v-card-title class="text-h6">Neue Benutzer anlegen</v-card-title>
+      <v-card-text>
+        <v-form ref="addUserForm" @submit.prevent="submitAddUser">
+          <v-text-field v-model="newUser.firstName" label="Vorname" required />
+          <v-text-field v-model="newUser.lastName" label="Nachname" required />
+          <v-text-field v-model="newUser.email" label="E-Mail" type="email" :rules="[emailRule]" />
+          <v-text-field v-model="newUser.phone" label="Telefone" />
+          <v-select
+            v-model="newUser.roleIds"
+            :items="roles"
+            item-title="name"
+            item-value="id"
+            label="Rollen"
+            multiple
+            chips
+            required
+          />
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          class="text-body-2 px-4 mr-2"
+          elevation="1"
+          @click="showAddUserDialog = false"
+          style="background-color: #f44336; color: white"
+        >
+          Abbrechen
+        </v-btn>
+        <v-btn
+          class="text-body-2 px-4"
+          elevation="1"
+          @click="submitAddUser"
+          style="background-color: #1867c0; color: white"
+          :loading="loadingCreateUsers"
+        >
+          Speichern
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import {
+  getAllUsers,
+  getAllRoles,
+  getUserRoles,
+  createAUser,
+  assignUserRoles,
+  deleteAUser,
+} from '@/api/index.js'
+import { notify } from '@/utils/notify'
 
 // Tabellen-Spalten
 const headers = [
@@ -40,31 +126,49 @@ const headers = [
   { title: 'E-Mail', key: 'email' },
   { title: 'Telefon', key: 'phone' },
   { title: 'Rollen', key: 'roles' },
+  { title: 'Aktionen', key: 'action', sortable: false },
 ]
 
 const users = ref([])
 const roles = ref([])
 const userRolesByUser = ref({})
 const snackbar = ref({ open: false, text: '', color: 'success' })
-const loading = ref({}) // { [roleId]: true | false }
+const loadingUpdateRoles = ref({}) // { [roleId]: true | false }
+const loadingCreateUsers = ref(null) // true | false
+
+// Modal
+const showAddUserDialog = ref(null)
+const newUser = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  roleIds: [],
+})
+const emailRule = (v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Ungültige E-Mail-Adresse'
 
 // Daten laden
 onMounted(async () => {
+  loadUsers()
+})
+
+async function loadUsers() {
   const [usersRes, rolesRes, assignmentsRes] = await Promise.all([
-    axios.get('http://localhost:8888/api/users'), // [{"id": 6,"firstName": "Ada","lastName": "Lovelace8498", "email": "ada8498@example.com", "phone": "+49 151 23456789"}]
-    axios.get('http://localhost:8888/api/roles'), // [{ "id": 1,"name": "admin"}]
-    axios.get('http://localhost:8888/api/assign/user-roles'), // [{"userid": 1, "roleid": 1}]
+    getAllUsers(),
+    getAllRoles(),
+    getUserRoles(),
   ])
 
   users.value = usersRes.data
   roles.value = rolesRes.data
+
   const grouped = {}
   assignmentsRes.data.forEach(({ userid, roleid }) => {
     if (!grouped[userid]) grouped[userid] = []
     grouped[userid].push(roleid)
   })
   userRolesByUser.value = grouped
-})
+}
 
 const usersWithRoles = computed(() => {
   return users.value.map((user) => ({
@@ -75,34 +179,99 @@ const usersWithRoles = computed(() => {
 
 // Rollen speichern (PUT)
 async function updateUserRoles(user, newIds) {
-  console.log(user, newIds)
   if (newIds.length === 0) {
-    notify('Ein Benutzer kann nicht ohne Rolle gespeichert werden', 'error')
+    notify(snackbar, 'Ein Benutzer kann nicht ohne Rolle gespeichert werden', 'error')
     return
   }
   const userId = user.id
   try {
-    loading.value = { ...loading.value, [userId]: true }
+    loadingUpdateRoles.value = { ...loadingUpdateRoles.value, [userId]: true }
 
-    await axios.put('http://localhost:8888/api/assign/user-roles', {
+    await assignUserRoles({
       userId: userId,
-      roleIds: user.roleIds,
+      roleIds: newIds,
     })
     userRolesByUser.value = {
       ...userRolesByUser.value,
       [userId]: newIds,
     }
-    console.log(userRolesByUser.value)
-    notify(`Rollen für "${user.firstName}" gespeichert`, 'success')
+    notify(snackbar, `Rollen für "${user.firstName}" gespeichert`, 'success')
   } catch (err) {
-    notify('Fehler beim Speichern des Benutzers', err)
+    notify(snackbar, 'Fehler beim Speichern des Benutzers', err)
   } finally {
     // Loading aus
-    loading.value = { ...loading.value, [userId]: false }
+    loadingUpdateRoles.value = { ...loadingUpdateRoles.value, [userId]: false }
   }
 }
 
-function notify(text, color = 'success') {
-  snackbar.value = { open: true, text, color }
+async function submitAddUser() {
+  const user = newUser.value
+  if (!user.firstName?.trim()) {
+    alert('Bitte Vornamen eingeben')
+    return
+  }
+  if (!user.lastName?.trim()) {
+    alert('Bitte Nachname eingeben')
+    return
+  }
+  if (!user.email?.trim()) {
+    alert('Bitte Email eingeben')
+    return
+  }
+  loadingCreateUsers.value = true
+  try {
+    const res = await createAUser({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+    })
+    if (res.status === 201 && res.data?.id && user.roleIds.length > 0) {
+      const userId = res.data.id
+      await assignUserRoles({
+        userId: userId,
+        roleIds: user.roleIds,
+      })
+      userRolesByUser.value = {
+        ...userRolesByUser.value,
+        [userId]: user.roleIds,
+      }
+    } else {
+      notify(snackbar, 'Fehler beim Anlegen des Benutzers', 'error')
+    }
+    notify(snackbar, 'Benutzer erfolgreich angelegt', 'success')
+  } catch (err) {
+    notify(snackbar, 'Fehler beim Anlegen des Benutzers', 'error')
+  } finally {
+    // Dialog schließen & Formular resetten
+    resetAddUserForm()
+    showAddUserDialog.value = false
+    loadingCreateUsers.value = false
+  }
+  await loadUsers()
+}
+
+async function deleteUser(item) {
+  try {
+    const res = await deleteAUser(item.id)
+    if (res.status === 204) {
+      notify(snackbar, `Benutzer mit Email "${item.email}" wurde gelöscht`, 'success')
+    } else {
+      notify(snackbar, `Fehler beim Löschen des Benutzers mit Email "${item.email}"`, 'error')
+    }
+  } catch (err) {
+    notify(snackbar, `Fehler beim Löschen des Benutzers mit Email "${item.email}"`, 'error')
+  }
+  await loadUsers()
+}
+
+function resetAddUserForm() {
+  newUser.value = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    roleIds: [],
+  }
 }
 </script>

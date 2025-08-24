@@ -7,11 +7,7 @@
 
     <v-navigation-drawer v-model="drawer" temporary>
       <v-list nav density="comfortable">
-        <v-list-item
-          to="/users"
-          title="Benutzer & Rollenbezogen"
-          prepend-icon="mdi-account-cog"
-        />
+        <v-list-item to="/users" title="Benutzer & Rollenbezogen" prepend-icon="mdi-account-cog" />
       </v-list>
       <v-list nav density="comfortable">
         <v-list-item
@@ -30,6 +26,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-const drawer = ref(false);
+import { ref } from 'vue'
+
+const drawer = ref(false)
 </script>
