@@ -40,7 +40,7 @@ const users = ref([]);
 const roles = ref([]);
 const assignments = ref([]);
 
-const saving = ref(new Set());
+//const saving = ref(new Set());
 
 const usersWithRoles = computed(() => {
   return users.value.map((user) => {

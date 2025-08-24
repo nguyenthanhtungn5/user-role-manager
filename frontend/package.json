@@ -10,7 +10,6 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "axios": "^1.11.0",
-    "core-js": "^3.8.3",
     "sass": "^1.90.0",
     "sass-loader": "^10.5.2",
     "vue": "3.5",
@@ -18,14 +17,18 @@
     "vuetify": "3.9"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-vue": "^9.33.0",
+    "prettier": "^3.6.2"
   },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
   "eslintConfig": {
     "root": true,
     "env": {
