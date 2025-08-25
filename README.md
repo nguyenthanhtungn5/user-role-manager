@@ -111,9 +111,9 @@ API-Endpunkte (basierend auf Swagger)
 | POST    | `/api/permissions`             | Neues Recht erstellen                     |
 | DELETE  | `/api/permissions/:id`         | Recht löschen                             |
 | GET     | `/api/assign/user-roles`       | Rollen-Zuweisungen zu Benutzern auflisten |
-| POST    | `/api/assign/user-roles`       | Rollen einem Benutzer zuweisen            |
+| PUT     | `/api/assign/user-roles`       | Rollen einem Benutzer zuweisen            |
 | GET     | `/api/assign/role-permissions` | Rechte-Zuweisungen zu Rollen auflisten    |
-| POST    | `/api/assign/role-permissions` | Rechte einer Rolle zuweisen               |
+| PUT     | `/api/assign/role-permissions` | Rechte einer Rolle zuweisen               |
 
 ## Entwicklungsskripte
 
@@ -121,7 +121,6 @@ API-Endpunkte (basierend auf Swagger)
 
 ```bash
 npm run dev
-npm start
 ```
 
 ### Frontend

@@ -75,7 +75,7 @@
           <v-text-field v-model="newUser.firstName" label="Vorname" required />
           <v-text-field v-model="newUser.lastName" label="Nachname" required />
           <v-text-field v-model="newUser.email" label="E-Mail" type="email" :rules="[emailRule]" />
-          <v-text-field v-model="newUser.phone" label="Telefone" />
+          <v-text-field v-model="newUser.phone" label="Telefone" :rules="[telRule]" />
           <v-select
             v-model="newUser.roleIds"
             :items="roles"
@@ -150,8 +150,8 @@ const newUser = ref({
   phone: '',
   roleIds: [],
 })
-const emailRule = (v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Ungültige E-Mail-Adresse'
-
+const emailRule = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Ungültige E-Mail-Adresse'
+const telRule = (v) => !v || /^[+0-9]/.test(v) || 'Ungültige Telefonnummer'
 // Daten laden
 onMounted(async () => {
   loadUsers()
