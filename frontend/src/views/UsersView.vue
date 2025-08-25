@@ -72,19 +72,33 @@
       <v-card-title class="text-h6">Neue Benutzer anlegen</v-card-title>
       <v-card-text>
         <v-form ref="addUserForm" @submit.prevent="submitAddUser">
-          <v-text-field v-model="newUser.firstName" label="Vorname" required />
-          <v-text-field v-model="newUser.lastName" label="Nachname" required />
-          <v-text-field v-model="newUser.email" label="E-Mail" type="email" :rules="[emailRule]" />
-          <v-text-field v-model="newUser.phone" label="Telefone" :rules="[telRule]" />
+          <v-text-field
+            v-model="newUser.firstName"
+            label="Vorname*"
+            :rules="[(v) => !!v || 'Vorname ist erforderlich']"
+          />
+          <v-text-field
+            v-model="newUser.lastName"
+            label="Nachname*"
+            :rules="[(v) => !!v || 'Nachname ist erforderlich']"
+          />
+          <v-text-field
+            v-model="newUser.email"
+            label="E-Mail*"
+            type="email"
+            required
+            :rules="[(v) => !!v || 'E-Mail ist erforderlich', emailRule]"
+          />
+          <v-text-field v-model="newUser.phone" label="Telefone" :rules="[telephoneRule]" />
           <v-select
             v-model="newUser.roleIds"
             :items="roles"
             item-title="name"
             item-value="id"
-            label="Rollen"
+            label="Rollen*"
             multiple
             chips
-            required
+            :rules="[(v) => (v && v.length > 0) || 'Mindestens eine Rolle auswählen']"
           />
         </v-form>
       </v-card-text>
@@ -140,6 +154,7 @@ const userRolesByUser = ref({})
 const snackbar = ref({ open: false, text: '', color: 'success' })
 const loadingUpdateRoles = ref({}) // { [roleId]: true | false }
 const loadingCreateUsers = ref(null) // true | false
+const addUserForm = ref(null)
 
 // Modal
 const showAddUserDialog = ref(null)
@@ -151,7 +166,7 @@ const newUser = ref({
   roleIds: [],
 })
 const emailRule = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Ungültige E-Mail-Adresse'
-const telRule = (v) => !v || /^[+0-9]/.test(v) || 'Ungültige Telefonnummer'
+const telephoneRule = (v) => !v || /^\+?[0-9]{2,15}$/.test(v) || 'Ungültige Telefonnummer'
 // Daten laden
 onMounted(async () => {
   loadUsers()
@@ -211,18 +226,10 @@ async function updateUserRoles(user, newIds) {
 
 async function submitAddUser() {
   const user = newUser.value
-  if (!user.firstName?.trim()) {
-    alert('Bitte Vornamen eingeben')
-    return
-  }
-  if (!user.lastName?.trim()) {
-    alert('Bitte Nachname eingeben')
-    return
-  }
-  if (!user.email?.trim()) {
-    alert('Bitte Email eingeben')
-    return
-  }
+  const form = addUserForm.value
+  const isValid = await form.validate().valid
+  if (!isValid) return
+
   loadingCreateUsers.value = true
   try {
     const res = await createAUser({
