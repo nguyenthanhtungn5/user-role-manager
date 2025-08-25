@@ -11,9 +11,9 @@
       <span class="text-h4">Benutzer verwalten</span>
       <v-btn
         @click="showAddUserDialog = true"
+        class="text-body-2 px-2 bg-grey-lighten-4 text-grey-darken-2"
+        elevation="2"
         color="primary"
-        class="text-body-2 px-4"
-        elevation="3"
         >Neue Benutzer anlegen</v-btn
       >
     </v-card-title>
@@ -131,7 +131,7 @@ const headers = [
   { title: 'E-Mail', key: 'email', minWidth: '4em' },
   { title: 'Telefon', key: 'phone', minWidth: '4em' },
   { title: 'Rollen', key: 'roles', minWidth: '8em' },
-  { title: 'Aktionen', key: 'action', sortable: false, minWidth: '4em' },
+  { title: 'Aktionen', key: 'action', sortable: false, width: '5em' },
 ]
 
 const users = ref([])

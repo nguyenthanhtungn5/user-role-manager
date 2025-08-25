@@ -57,8 +57,15 @@
       </v-data-table>
     </v-card>
     <!-- Snackbar für Erfolg/Error -->
-    <v-snackbar v-model="snackbar.open" :timeout="3000" :color="snackbar.color">
-      {{ snackbar.text }}
+    <v-snackbar
+      v-model="snackbar.open"
+      :timeout="3000"
+      :color="snackbar.color"
+      location="top center"
+    >
+      <div class="text-center mx-auto" style="width: fit-content">
+        {{ snackbar.text }}
+      </div>
     </v-snackbar>
   </v-container>
   <v-dialog
@@ -123,7 +130,7 @@ import { notify } from '@/utils/notify'
 const headers = [
   { title: 'Rolle', key: 'name', minWidth: '10em' },
   { title: 'Rechte', key: 'permissions', minWidth: '20em' },
-  { title: 'Aktionen', key: 'action', sortable: false, minWidth: '5em' },
+  { title: 'Aktionen', key: 'action', sortable: false, width: '5em' },
 ]
 
 const roles = ref([])

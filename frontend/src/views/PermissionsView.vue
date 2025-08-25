@@ -91,7 +91,7 @@ import { notify } from '@/utils/notify'
 
 const headers = [
   { title: 'Rechte', key: 'name', minWidth: '10em' },
-  { title: 'Aktionen', key: 'action', sortable: false, minWidth: '5em' },
+  { title: 'Aktionen', key: 'action', sortable: false, width: '5em' },
 ]
 
 const permissions = ref([])
