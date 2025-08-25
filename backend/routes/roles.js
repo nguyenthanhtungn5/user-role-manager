@@ -2,6 +2,7 @@ import { Router } from "express";
 import { query as dbQuery } from "../db/db.js";
 import { body } from "express-validator";
 import { validate } from "../middlewares/validate.js";
+import { pool } from "../db/db.js";
 
 const router = Router();
 
@@ -25,11 +26,9 @@ router.post(
   validate,
   async (req, res) => {
     const client = await pool.connect();
-    const { name } = req.body;
     const sql = `INSERT INTO roles(name) VALUES ($1) RETURNING *`;
-    const params = [name];
     try {
-      const { rows } = await client.query(sql, params);
+      const { rows } = await client.query(sql, [req.body.name]);
       res.status(201).json(rows[0]);
     } catch (e) {
       return res

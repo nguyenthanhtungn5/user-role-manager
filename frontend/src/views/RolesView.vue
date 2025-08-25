@@ -1,8 +1,29 @@
+<style scoped>
+.custom-dialog-overlay {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+</style>
 <template>
   <v-container>
-    <v-card-title>Rolle verwalten </v-card-title>
+    <v-card-title class="d-flex justify-space-between align-center">
+      <span class="text-h4">Rolle verwalten</span>
+      <v-btn
+        @click="showAddRoleDialog = true"
+        color="primary"
+        class="text-body-2 px-4"
+        elevation="3"
+        >Neue Rolle anlegen</v-btn
+      ></v-card-title
+    >
     <v-card>
-      <v-data-table :headers="headers" :items="roleWithPermissions" item-key="id">
+      <v-data-table
+        :headers="headers"
+        :items="roleWithPermissions"
+        item-key="id"
+        :items-per-page="5"
+        :items-per-page-options="[5, 10, 20, 50]"
+      >
         <template #[`item.permissions`]="{ item }">
           <v-select
             :model-value="item.permissionIds"
@@ -17,6 +38,22 @@
             :loading="loadingByRole[item.id] === true"
           />
         </template>
+        <template #[`item.action`]="{ item }">
+          <div class="d-flex justify-center align-center" style="height: 100%; gap: 8px">
+            <v-tooltip text="Rolle löschen" location="bottom">
+              <template #activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon
+                  color="error"
+                  style="cursor: pointer"
+                  @click="deleteRole(item)"
+                  >mdi-delete-outline</v-icon
+                >
+              </template>
+            </v-tooltip>
+          </div>
+        </template>
       </v-data-table>
     </v-card>
     <!-- Snackbar für Erfolg/Error -->
@@ -24,6 +61,51 @@
       {{ snackbar.text }}
     </v-snackbar>
   </v-container>
+  <v-dialog
+    v-model="showAddRoleDialog"
+    max-width="600px"
+    min-width="500px"
+    overlay-class="custom-dialog-overlay"
+  >
+    <v-card class="px-4 py-4">
+      <v-card-title class="text-h6">Neue Rolle anlegen</v-card-title>
+      <v-card-text>
+        <v-form ref="addRoleForm" @submit.prevent="submitAddRole">
+          <v-text-field v-model="newRole.name" label="Name" required />
+          <v-select
+            v-model="newRole.permissionIds"
+            :items="permissions"
+            item-title="name"
+            item-value="id"
+            label="Rechte"
+            multiple
+            chips
+            required
+          />
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          class="text-body-2 px-4 mr-2"
+          elevation="1"
+          @click="showAddRoleDialog = false"
+          style="background-color: #f44336; color: white"
+        >
+          Abbrechen
+        </v-btn>
+        <v-btn
+          class="text-body-2 px-4"
+          elevation="1"
+          @click="submitAddRole"
+          style="background-color: #1867c0; color: white"
+          :loading="loadingCreateRole"
+        >
+          Speichern
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -31,15 +113,16 @@ import { computed, onMounted, ref } from 'vue'
 import {
   assignRolePermissions,
   getAllPermissions,
-  getAllRoles,
+  createARole,
   getRolePermissions,
+  getAllRoles,
 } from '@/api/index.js'
 import { notify } from '@/utils/notify'
 
 const headers = [
-  { title: 'ID', key: 'id' },
-  { title: 'Rolle', key: 'name' },
-  { title: 'Rechte', key: 'permissions' },
+  { title: 'Rolle', key: 'name', minWidth: '10em' },
+  { title: 'Rechte', key: 'permissions', minWidth: '20em' },
+  { title: 'Aktionen', key: 'action', sortable: false, minWidth: '5em' },
 ]
 
 const roles = ref([])
@@ -48,8 +131,17 @@ const rolePermissionsByRole = ref({}) // z.B. { 1: [1,2], 2: [3] }
 const loadingByRole = ref({}) // { [roleId]: true | false }
 const snackbar = ref({ open: false, text: '', color: 'success' })
 
+// Modal
+const showAddRoleDialog = ref(null)
+const newRole = ref({ name: '', permissionIds: [] })
+const loadingCreateRole = ref(null)
+
 // Daten laden
 onMounted(async () => {
+  await loadRoles()
+})
+
+async function loadRoles() {
   const [rolesRes, permissionsRes, rolePermissionsRes] = await Promise.all([
     getAllRoles(), // [{ "id": 1, "name": "admin" }]
     getAllPermissions(), // [{"id": 6, "name": "role_delete"}]
@@ -66,7 +158,7 @@ onMounted(async () => {
     grouped[roleid].push(permissionid)
   })
   rolePermissionsByRole.value = grouped
-})
+}
 
 const roleWithPermissions = computed(() => {
   return roles.value.map((role) => ({
@@ -119,6 +211,41 @@ const mapPermissionName = (rawName) => {
       return 'Rolle löschen'
     default:
       return rawName?.replaceAll('_', ' ') || ''
+  }
+}
+
+async function submitAddRole() {
+  const role = newRole.value
+  if (!role.name?.trim()) {
+    alert('Bitte ein Name eingeben')
+    return
+  }
+  loadingCreateRole.value = true
+  try {
+    const res = await createARole({
+      name: role.name,
+    })
+    if (res.status === 201 && res.data?.id && role.permissionIds.length > 0) {
+      notify(snackbar, 'Rolle erfolgreich angelegt', 'success')
+    } else {
+      notify(snackbar, 'Fehler beim Anlegen der Rolle', 'error')
+    }
+    notify(snackbar, 'Rolle erfolgreich angelegt', 'success')
+  } catch (err) {
+    notify(snackbar, 'Fehler beim Anlegen der Rolle', 'error')
+  } finally {
+    // Dialog schließen & Formular resetten
+    resetAddRoleForm()
+    showAddRoleDialog.value = false
+    loadingCreateRole.value = false
+  }
+  await loadRoles()
+}
+
+function resetAddRoleForm() {
+  newRole.value = {
+    name: '',
+    permissionIds: [],
   }
 }
 </script>

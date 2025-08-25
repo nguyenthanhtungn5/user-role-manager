@@ -25,6 +25,10 @@ export function getUserRoles() {
   return api.get('/api/assign/user-roles')
 }
 
+export function createARole({ name }) {
+  return api.post('/api/roles', { name })
+}
+
 export function assignUserRoles({ userId, roleIds }) {
   return api.put('/api/assign/user-roles', { userId, roleIds })
 }

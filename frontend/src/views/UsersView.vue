@@ -18,7 +18,13 @@
       >
     </v-card-title>
     <v-card>
-      <v-data-table :headers="headers" :items="usersWithRoles" item-key="id">
+      <v-data-table
+        :headers="headers"
+        :items="usersWithRoles"
+        item-key="id"
+        :items-per-page="5"
+        :items-per-page-options="[5, 10, 20, 50]"
+      >
         <template #[`item.roles`]="{ item }">
           <v-select
             :model-value="item.roleIds"
@@ -120,13 +126,12 @@ import { notify } from '@/utils/notify'
 
 // Tabellen-Spalten
 const headers = [
-  { title: 'ID', key: 'id' },
-  { title: 'Vorname', key: 'firstName' },
-  { title: 'Nachname', key: 'lastName' },
-  { title: 'E-Mail', key: 'email' },
-  { title: 'Telefon', key: 'phone' },
-  { title: 'Rollen', key: 'roles' },
-  { title: 'Aktionen', key: 'action', sortable: false },
+  { title: 'Vorname', key: 'firstName', minWidth: '4em' },
+  { title: 'Nachname', key: 'lastName', minWidth: '4em' },
+  { title: 'E-Mail', key: 'email', minWidth: '4em' },
+  { title: 'Telefon', key: 'phone', minWidth: '4em' },
+  { title: 'Rollen', key: 'roles', minWidth: '8em' },
+  { title: 'Aktionen', key: 'action', sortable: false, minWidth: '4em' },
 ]
 
 const users = ref([])

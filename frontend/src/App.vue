@@ -18,7 +18,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-main>
-      <v-container class="py-6" max-width="80em">
+      <v-container class="py-6" max-width="80em" min-width="60em" style="font-size: x-large">
         <router-view />
       </v-container>
     </v-main>
