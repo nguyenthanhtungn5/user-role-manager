@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body, query, param } from "express-validator";
-import { query as dbQuery } from "../db/db.js";
 import { validate } from "../middlewares/validate.js";
+import { pool } from "../db/db.js";
 
 const router = Router();
 
@@ -12,6 +12,8 @@ router.get(
   query("offset").optional().isInt({ min: 0 }).toInt(),
   query("email").optional().isEmail(),
   async (req, res) => {
+    const client = await pool.connect();
+
     const limit = req.query.limit || 20;
     const offset = req.query.offset || 0;
     const email = (req.query.email || "").trim();
@@ -31,7 +33,7 @@ router.get(
       LIMIT $${email ? 2 : 1} OFFSET $${email ? 3 : 2}
     `;
     try {
-      const { rows } = await dbQuery(sql, params);
+      const { rows } = await client.query(sql, params);
       res.status(200).json(rows);
     } catch (e) {
       res.status(500).json({ errors: e.message });
@@ -55,9 +57,10 @@ router.post(
     const sql = `INSERT INTO users (first_name, last_name, email, phone)
          VALUES ($1, $2, $3, $4) RETURNING *`;
     const params = [firstName, lastName, email, phone || null];
+    const client = await pool.connect();
 
     try {
-      const { rows } = await dbQuery(sql, params);
+      const { rows } = await client.query(sql, params);
       res.status(201).json(rows[0]);
     } catch (e) {
       return res
@@ -71,10 +74,11 @@ router.post(
 
 router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
   const sql = `DELETE FROM users WHERE id = $1`;
+  const client = await pool.connect();
 
   try {
     const id = parseInt(req.params.id, 10);
-    await dbQuery(sql, [id]);
+    await client.query(sql, [id]);
     res.status(204).send();
   } catch (e) {
     return res.status(500).json({ message: e.message });

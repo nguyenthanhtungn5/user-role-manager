@@ -7,7 +7,6 @@ const router = Router();
 
 // GET /api/assign/user-roles
 router.get("/user-roles", async (req, res) => {
-  debugger;
   const client = await pool.connect();
 
   try {
