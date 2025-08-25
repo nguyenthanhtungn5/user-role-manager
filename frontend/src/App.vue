@@ -7,14 +7,9 @@
 
     <v-navigation-drawer v-model="drawer" temporary>
       <v-list nav density="comfortable">
-        <v-list-item to="/users" title="Benutzer & Rollenbezogen" prepend-icon="mdi-account-cog" />
-      </v-list>
-      <v-list nav density="comfortable">
-        <v-list-item
-          to="/roles"
-          title="Benutzerrolle / Berechtigung"
-          prepend-icon="mdi-shield-key"
-        />
+        <v-list-item to="/users" title="Benutzer" prepend-icon="mdi-account-cog" />
+        <v-list-item to="/roles" title="Benutzerrolle" prepend-icon="mdi-shield-key" />
+        <v-list-item to="/permissions" title="Berechtigung" prepend-icon="mdi-key" />
       </v-list>
     </v-navigation-drawer>
     <v-main>

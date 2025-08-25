@@ -29,12 +29,24 @@ export function createARole({ name }) {
   return api.post('/api/roles', { name })
 }
 
+export function deleteARole(id) {
+  return api.delete(`/api/roles/${id}`)
+}
+
 export function assignUserRoles({ userId, roleIds }) {
   return api.put('/api/assign/user-roles', { userId, roleIds })
 }
 
 export function getAllPermissions() {
   return api.get('/api/permissions')
+}
+
+export function createAPermission({ name }) {
+  return api.post('/api/permissions', { name })
+}
+
+export function deleteAPermission(id) {
+  return api.delete(`/api/permissions/${id}`)
 }
 
 export function getRolePermissions() {

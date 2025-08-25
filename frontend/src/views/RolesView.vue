@@ -116,6 +116,7 @@ import {
   createARole,
   getRolePermissions,
   getAllRoles,
+  deleteARole,
 } from '@/api/index.js'
 import { notify } from '@/utils/notify'
 
@@ -238,6 +239,16 @@ async function submitAddRole() {
     resetAddRoleForm()
     showAddRoleDialog.value = false
     loadingCreateRole.value = false
+  }
+  await loadRoles()
+}
+
+async function deleteRole(item) {
+  try {
+    await deleteARole(item.id)
+    notify(snackbar, `Rolle ${item.name} erfolgreich gelöscht`, 'success')
+  } catch (err) {
+    notify(snackbar, 'Fehler beim Löschen der Rolle ${item.name}', 'error')
   }
   await loadRoles()
 }

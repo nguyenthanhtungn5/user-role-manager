@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { query as dbQuery } from "../db/db.js";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import { validate } from "../middlewares/validate.js";
 import { pool } from "../db/db.js";
 
@@ -83,5 +83,18 @@ router.post(
     }
   }
 );
+
+// DELETE /api/roles/:id
+router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
+  const sql = "DELETE FROM roles WHERE id = $1";
+
+  try {
+    const id = parseInt(req.params.id, 10);
+    await dbQuery(sql, [id]);
+    res.status(204).send();
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 export default router;

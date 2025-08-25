@@ -44,8 +44,6 @@ router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ message: e.message });
-  } finally {
-    client.release();
   }
 });
 
