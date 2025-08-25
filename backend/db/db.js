@@ -9,3 +9,16 @@ export async function query(text, params) {
   const res = await pool.query(text, params);
   return res;
 }
+
+export const simpleRequestDBHelper = async (res, callback) => {
+  const client = await pool.connect();
+  try {
+    return await callback(client);
+  } catch (err) {
+    return res
+      .status(err.code === "23505" ? 409 : 500)
+      .json({ error: err.message });
+  } finally {
+    client.release();
+  }
+};

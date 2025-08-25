@@ -1,23 +1,18 @@
 import { Router } from "express";
 import { body, param } from "express-validator";
 import { validate } from "../middlewares/validate.js";
-import { pool } from "../db/db.js";
+import { pool, simpleRequestDBHelper } from "../db/db.js";
 
 const router = Router();
 
 // GET /api/roles
 router.get("/", async (req, res) => {
-  const client = await pool.connect();
+  const sql = `SELECT id, name FROM roles`;
 
-  try {
-    const sql = `SELECT id, name FROM roles`;
+  await simpleRequestDBHelper(res, async (client) => {
     const { rows } = await client.query(sql);
     res.status(200).json(rows);
-  } catch (e) {
-    return res.status(500).json({ message: e.message });
-  } finally {
-    client.release();
-  }
+  });
 });
 
 // POST /api/roles  { name }
@@ -26,18 +21,12 @@ router.post(
   body("name").isString().trim().notEmpty(),
   validate,
   async (req, res) => {
-    const client = await pool.connect();
     const sql = `INSERT INTO roles(name) VALUES ($1) RETURNING *`;
-    try {
+
+    await simpleRequestDBHelper(res, async (client) => {
       const { rows } = await client.query(sql, [req.body.name]);
       res.status(201).json(rows[0]);
-    } catch (e) {
-      return res
-        .status(e.code === "23505" ? 409 : 500)
-        .json({ message: e.message });
-    } finally {
-      client.release();
-    }
+    });
   }
 );
 
@@ -88,17 +77,12 @@ router.post(
 // DELETE /api/roles/:id
 router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
   const sql = "DELETE FROM roles WHERE id = $1";
-  const client = await pool.connect();
+  const id = parseInt(req.params.id, 10);
 
-  try {
-    const id = parseInt(req.params.id, 10);
+  await simpleRequestDBHelper(res, async (client) => {
     await client.query(sql, [id]);
-    res.status(204).send();
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  } finally {
-    client.release();
-  }
+    res.status(201).json(rows[0]);
+  });
 });
 
 export default router;

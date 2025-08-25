@@ -227,8 +227,9 @@ async function updateUserRoles(user, newIds) {
 async function submitAddUser() {
   const user = newUser.value
   const form = addUserForm.value
-  const isValid = await form.validate().valid
-  if (!isValid) return
+  const validation = await form.validate()
+  console.log(validation.valid)
+  if (!validation.valid) return
 
   loadingCreateUsers.value = true
   try {

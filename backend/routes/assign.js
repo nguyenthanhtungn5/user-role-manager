@@ -1,24 +1,17 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { pool } from "../db/db.js";
+import { pool, simpleRequestDBHelper } from "../db/db.js";
 import { validate } from "../middlewares/validate.js";
 
 const router = Router();
 
 // GET /api/assign/user-roles
 router.get("/user-roles", async (req, res) => {
-  const client = await pool.connect();
-
-  try {
-    const { rows } = await client.query(
-      `SELECT user_id AS userId, role_id AS roleId FROM user_roles`
-    );
-    res.status(200).send(rows);
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  } finally {
-    client.release();
-  }
+  const sql = `SELECT user_id AS userId, role_id AS roleId FROM user_roles`;
+  await simpleRequestDBHelper(res, async (client) => {
+    const { rows } = await client.query(sql);
+    res.status(200).json(rows);
+  });
 });
 
 // PUT /api/assign/user-roles  { userId, roleIds: [] }
@@ -62,18 +55,12 @@ router.put(
 
 // GET /api/assign/user-roles
 router.get("/role-permissions", async (req, res) => {
-  const client = await pool.connect();
+  const sql = `SELECT role_id AS roleId, permission_id AS permissionId FROM role_permissions`;
 
-  try {
-    const { rows } = await client.query(
-      `SELECT role_id AS roleId, permission_id AS permissionId FROM role_permissions`
-    );
-    res.status(200).send(rows);
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  } finally {
-    client.release();
-  }
+  await simpleRequestDBHelper(res, async (client) => {
+    const { rows } = await client.query(sql);
+    res.status(200).json(rows);
+  });
 });
 
 // PUT /api/assign/role-permissions  { roleId, permissionIds: [] }
