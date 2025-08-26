@@ -4,7 +4,7 @@ Ein vollständiges Full-Stack-Projekt zur Verwaltung von **Benutzern, Rollen und
 
 - **Backend**: Node.js + Express + PostgreSQL
 - **Frontend**: Vue.js + Vuetify
-- **Datenbank**: PostgreSQL
+- **Datenbank**: PostgreSQL (in Docker container)
 
 ## Projektstruktur
 
@@ -21,14 +21,14 @@ user-management-fullstack/
 ### Node.js + npm installieren
 
 https://nodejs.org (LTS-Version wählen)
+https://www.npmjs.com/
 
-### PostgreSQL installieren
+### Docker + Docker compose installieren
 
-https://www.postgresql.org/download/
+https://docs.docker.com/get-docker/
+https://docs.docker.com/compose/
 
 Optional: ein Client für Posgresql installieren: dbBeaver
-
-Beim Setup: Benutzer `postgres` + Passwort vergeben
 
 ### Vue CLI installieren
 
@@ -46,6 +46,8 @@ npm init -y
 npm install express pg cors dotenv
 npm install --save-dev nodemon
 ```
+
+Benutzer `postgres` + Passwort vergeben
 
 #### Beispiel `.env`
 
