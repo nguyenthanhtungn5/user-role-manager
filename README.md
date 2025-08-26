@@ -87,9 +87,7 @@ npm run serve
 
 ### 3. Datenbank vorbereiten
 
-1. PostgreSQL starten
-2. Neue Datenbank erstellen: `user_management`
-3. SQL-Schema aus `sql/init.sql` ausführen
+Starten mit Command: docker compose up
 
 ## API-Dokumentation (Swagger UI)
 
