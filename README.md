@@ -47,8 +47,6 @@ npm install express pg cors dotenv
 npm install --save-dev nodemon
 ```
 
-Benutzer `postgres` + Passwort vergeben
-
 #### Beispiel `.env`
 
 ```env
