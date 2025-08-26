@@ -50,12 +50,13 @@ npm install --save-dev nodemon
 #### Beispiel `.env`
 
 ```env
-PORT=5000
 DB_USER=postgres
-DB_PASSWORD=dein_passwort
+DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=user_management
+PORT=8888
+
 ```
 
 #### Backend starten
