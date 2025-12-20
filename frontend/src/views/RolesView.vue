@@ -1,18 +1,12 @@
-<style scoped>
-.custom-dialog-overlay {
-  backdrop-filter: blur(8px);
-  background-color: rgba(0, 0, 0, 0.2);
-}
-</style>
 <template>
   <v-container>
     <v-card-title class="d-flex justify-space-between align-center">
       <span class="text-h4">Rolle verwalten</span>
       <v-btn
-        @click="showAddRoleDialog = true"
         color="primary"
         class="text-body-2 px-4"
         elevation="3"
+        @click="showAddRoleDialog = true"
         >Neue Rolle anlegen</v-btn
       ></v-card-title
     >
@@ -34,8 +28,8 @@
             chips
             hide-details
             density="comfortable"
-            @update:model-value="(val) => updatePermissionRoles(item, val)"
             :loading="loadingByRole[item.id] === true"
+            @update:model-value="(val) => updatePermissionRoles(item, val)"
           />
         </template>
         <template #[`item.action`]="{ item }">
@@ -96,17 +90,17 @@
         <v-btn
           class="text-body-2 px-4 mr-2"
           elevation="1"
-          @click="showAddRoleDialog = false"
           style="background-color: #f44336; color: white"
+          @click="showAddRoleDialog = false"
         >
           Abbrechen
         </v-btn>
         <v-btn
           class="text-body-2 px-4"
           elevation="1"
-          @click="submitAddRole"
           style="background-color: #1867c0; color: white"
           :loading="loadingCreateRole"
+          @click="submitAddRole"
         >
           Speichern
         </v-btn>
@@ -114,7 +108,6 @@
     </v-card>
   </v-dialog>
 </template>
-
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import {
@@ -267,3 +260,10 @@ function resetAddRoleForm() {
   }
 }
 </script>
+
+<style scoped>
+.custom-dialog-overlay {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+</style>

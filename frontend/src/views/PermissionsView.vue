@@ -1,18 +1,12 @@
-<style scoped>
-.custom-dialog-overlay {
-  backdrop-filter: blur(8px);
-  background-color: rgba(0, 0, 0, 0.2);
-}
-</style>
 <template>
   <v-container>
     <v-card-title class="d-flex justify-space-between align-center">
       <span class="text-h4">Rechte verwalten</span>
       <v-btn
-        @click="showAddPermissionDialog = true"
         color="primary"
         class="text-body-2 px-4"
         elevation="3"
+        @click="showAddPermissionDialog = true"
         >Neue Rechte anlegen</v-btn
       ></v-card-title
     >
@@ -65,17 +59,17 @@
         <v-btn
           class="text-body-2 px-4 mr-2"
           elevation="1"
-          @click="showAddPermissionDialog = false"
           style="background-color: #f44336; color: white"
+          @click="showAddPermissionDialog = false"
         >
           Abbrechen
         </v-btn>
         <v-btn
           class="text-body-2 px-4"
           elevation="1"
-          @click="submitAddPermission"
           style="background-color: #1867c0; color: white"
           :loading="loadingCreateRole"
+          @click="submitAddPermission"
         >
           Speichern
         </v-btn>
@@ -83,7 +77,6 @@
     </v-card>
   </v-dialog>
 </template>
-
 <script setup>
 import { onMounted, ref } from 'vue'
 import { getAllPermissions, createAPermission, deleteAPermission } from '@/api/index.js'
@@ -176,3 +169,10 @@ function resetAddPermissionForm() {
   }
 }
 </script>
+
+<style scoped>
+.custom-dialog-overlay {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+</style>
