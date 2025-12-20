@@ -80,6 +80,7 @@ router.delete("/:id", param("id").isInt(), validate, async (req, res) => {
   const id = parseInt(req.params.id, 10);
 
   await simpleRequestDBHelper(res, async (client) => {
+    const { rows } = await client.query(sql);
     await client.query(sql, [id]);
     res.status(201).json(rows[0]);
   });
