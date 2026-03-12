@@ -162,6 +162,7 @@ const emailRule = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Ungültige E-M
 const telephoneRule = (v) => !v || /^\+?[0-9]{2,15}$/.test(v) || 'Ungültige Telefonnummer'
 // Daten laden
 onMounted(async () => {
+  console.log('load users')
   loadUsers()
 })
 
